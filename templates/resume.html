@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Resume builder</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="static/assets/favicon.ico" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" type="text/css" />
+        <!-- Google fonts-->
+        <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="static/css/styles.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Navigation-->
+        <nav class="navbar navbar-light bg-light static-top">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('resume_appform') }}">Resume builder</a>
+                <a class="btn btn-primary btn-sm" href="{{ url_for('logout') }}">Выход</a>
+            </div>
+        </nav>
+        <section>
+            <div class="container p-4">
+                <div class="row">
+                    <div class="col">
+                        {% if success %}
+                        <p class="text-success">{{ success }}</p>
+                        {% endif %}
+                        {% if error %}
+                        <p class="text-danger">{{ error }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <form method="POST" action="{{ url_for('resume_appform') }}">
+                        <div class="row p-2">
+                            <div class="col gx-3">
+                                <div class="form-control">
+                                    <p>Укажите ваши навыки</p>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.skillPython %}1{% endif %}" id="skillPython" name="skillPython"{% if data.skillPython %} checked{% endif %}>
+                                        <label class="form-check-label" for="skillPython">Python</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.skillNumPy %}1{% endif %}" id="skillNumPy" name="skillNumPy"{% if data.skillNumPy %} checked{% endif %}>
+                                        <label class="form-check-label" for="skillNumPy">NumPy</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.skillPandas %}1{% endif %}" id="skillPandas" name="skillPandas"{% if data.skillPandas %} checked{% endif %}>
+                                        <label class="form-check-label" for="skillPandas">Pandas</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.skillMatplotlib %}1{% endif %}" id="skillMatplotlib" name="skillMatplotlib"{% if data.skillMatplotlib %} checked{% endif %}>
+                                        <label class="form-check-label" for="skillMatplotlib">Matplotlib</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.skillSeaborn %}1{% endif %}" id="skillSeaborn" name="skillSeaborn"{% if data.skillSeaborn %} checked{% endif %}>
+                                        <label class="form-check-label" for="skillSeaborn">Seaborn</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.skillKeras %}1{% endif %}" id="skillKeras" name="skillKeras"{% if data.skillKeras %} checked{% endif %}>
+                                        <label class="form-check-label" for="skillKeras">Keras</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.skillPytorch %}1{% endif %}" id="skillPytorch" name="skillPytorch"{% if data.skillPytorch %} checked{% endif %}>
+                                        <label class="form-check-label" for="skillPytorch">Pytorch</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.skillTensorflow %}1{% endif %}" id="skillTensorflow" name="skillTensorflow"{% if data.skillTensorflow %} checked{% endif %}>
+                                        <label class="form-check-label" for="skillTensorflow">Tensorflow</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.skillNLP %}1{% endif %}" id="skillNLP" name="skillNLP"{% if data.skillNLP %} checked{% endif %}>
+                                        <label class="form-check-label" for="skillNLP">NLP</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.skillGPT %}1{% endif %}" id="skillGPT" name="skillGPT"{% if data.skillGPT %} checked{% endif %}>
+                                        <label class="form-check-label" for="skillGPT">GPT</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.skillObjectDetection %}1{% endif %}" id="skillObjectDetection" name="skillObjectDetection"{% if data.skillObjectDetection %} checked{% endif %}>
+                                        <label class="form-check-label" for="skillObjectDetection">Object Detection</label>
+                                    </div>
+                                    <div class="mb-1">
+                                        <br>
+                                        <label for="customSkills" class="form-label">Прочие навыки</label>
+                                        <textarea class="form-control" id="customSkills" name="customSkills" rows="3">{{ data.customSkills }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row p-2">
+                            <div class="col gx-3">
+                                <div class="form-control">
+                                    <label for="education" class="form-label">Образование (высшее/дополнительное/курсы)</label>
+                                    <textarea class="form-control" id="education" name="education" rows="15">{{ data.education }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row p-2">
+                            <div class="col gx-3">
+                                    <div class="form-control">
+                                    <label for="experience" class="form-label">Опыт работы</label>
+                                    <textarea class="form-control" id="experience" name="experience" rows="15">{{ data.experience }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row p-2">
+                            <div class="col gx-3">
+                                <div class="form-control">
+                                    <p>Основной курс в УИИ</p>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.courseDataScience %}1{% endif %}" id="courseDataScience" name="courseDataScience"{% if data.courseDataScience %} checked{% endif %}>
+                                        <label class="form-check-label" for="courseDataScience">Data Science, нейронные сети, машинное обучение и искусственный интеллект</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="{% if data.coursePython %}1{% endif %}" id="coursePython" name="coursePython"{% if data.coursePython %} checked{% endif %}>
+                                        <label class="form-check-label" for="coursePython">Python разработчик</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row p-2">
+                            <div class="col mx-auto">
+                                <button type="submit" class="btn btn-primary btn-sm" name="btnSave">Сохранить</button>&nbsp;
+                                <button type="submit" class="btn btn-primary btn-sm" name="btnGen">Сформировать резюме</button>
+                                <button type="submit" class="btn btn-primary btn-sm" name="btnPDF">PDF</button>
+                            </div>
+                        </div>
+                        </form>
+                    </div>
+                    <div class="col p-2">
+                        <div class="form-control">
+                            {% if resume %}
+                            {{ resume }}
+                            {% else %}
+                            Резюме ещё не сформировано
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Footer-->
+        <footer class="footer bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 h-100 text-center text-lg-start my-auto">
+                        <p class="text-muted small mb-4 mb-lg-0">&copy; Resume builder 2023. All Rights Reserved.</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="static/js/scripts.js"></script>
+        <!-- JQuery -->
+        <script src="static/js/jquery-3.6.1.min.js"></script>
+        <!-- Custom scripts -->
+        <script src="static/js/my_script.js"></script>
+    </body>
+</html>
