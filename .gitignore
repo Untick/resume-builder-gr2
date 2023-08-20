@@ -1,1 +1,3 @@
 resumeGPT-env/
+__pycache__
+sqlite.db
