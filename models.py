@@ -26,6 +26,13 @@ class User(Base):
 class AppForm(Base):
     __tablename__ = "appform"
     id = Column(Integer, ForeignKey(User.id), primary_key=True)
+    name = Column(String(100))
+    birthdate = Column(String(10))
+    city = Column(String(50))
+    phone = Column(String(30))
+    email = Column(String(50))
+    telegram = Column(String(30))
+
     skillPython = Column(Boolean)
     skillNumPy = Column(Boolean)
     skillPandas = Column(Boolean)
@@ -38,8 +45,10 @@ class AppForm(Base):
     skillGPT = Column(Boolean)
     skillObjectDetection = Column(Boolean)
     customSkills = Column(String)
+
     education = Column(String)
     experience = Column(String)
+
     courseDataScience = Column(Boolean)
     coursePython = Column(Boolean)
 

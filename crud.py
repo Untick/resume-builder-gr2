@@ -1,3 +1,5 @@
+from sqlalchemy import or_
+
 from models import SessionLocal, User, AppForm, Resume
 
 
@@ -10,6 +12,29 @@ def get_user_by_name(username: str):
         return None
 
     return user.id, user.username, user.password
+
+
+# Получение данных пользователя по telegram id
+def get_user_by_tg_id(tg_id: str):
+    if not tg_id:
+        return None
+
+    # обработка случая различных вариантов записи id telegram
+    if tg_id.startswith('@'):
+        tg_id2 = tg_id[1:]
+    else:
+        tg_id2 = f'@{tg_id}'
+
+    with SessionLocal() as session:
+        user_info = session.query(User.id, AppForm.name, AppForm.telegram) \
+            .join(User, User.id == AppForm.id) \
+            .filter(or_(AppForm.telegram == tg_id, AppForm.telegram == tg_id2)) \
+            .first()
+
+    if not user_info:
+        return None
+
+    return user_info.id, user_info.name
 
 
 # Создание пользователя
@@ -46,9 +71,10 @@ def save_appform(user_id: int, data: dict):
     data_bool.update({key: False for key in keys_bool if key not in data})
 
     # для данных типа str
-    keys_str = ['customSkills', 'education', 'experience']
+    keys_str = ['name', 'birthdate', 'city', 'phone', 'email', 'telegram',
+                'customSkills', 'education', 'experience']
     data_str = {key: str(value) for key, value in data.items() if key in keys_str}
-    data_str.update({key: 0 for key in keys_str if key not in data})
+    data_str.update({key: '' for key in keys_str if key not in data})
 
     try:
         with SessionLocal() as session:
@@ -57,7 +83,6 @@ def save_appform(user_id: int, data: dict):
             if appform:
                 # обновляем анкету существующего пользователя
                 merged_dict = {**data_bool, **data_str}  # объединение словарей
-                print(merged_dict)
                 appform = session.query(AppForm).get(user_id)
                 for key, value in merged_dict.items():
                     setattr(appform, key, value)

@@ -1,10 +1,9 @@
 import uvicorn
-from faker import Faker
-from random import randint
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from aiogram import types, Dispatcher
 
 import auth
 import models
@@ -12,6 +11,7 @@ import crud
 import pdf
 import utils
 import chatgpt
+import telegram
 
 # создаём приложение fastapi
 app = FastAPI(title='Resume builder')
@@ -94,10 +94,12 @@ async def resume_appform(request: Request):
 
         # формирование и сохранение резюме
         if 'btnGen' in data:
-            result = chatgpt.gpt_resume_builder_entry_point(user_id)
-            fake = Faker()
-            fake_resume = fake.words(nb=randint(100, 500))
-            crud.save_resume(user_id, ', '.join(fake_resume))
+            result = chatgpt.gpt_resume_builder(user_id)
+            if result:
+                if not crud.save_resume(user_id, ', '.join(result)):
+                    error = 'Ошибка сохранения резюме'
+            else:
+                error = 'Ошибка генерации резюме'
 
         if 'btnPDF' in data:
             pdf.get_pdf_resume(user_id)
@@ -120,9 +122,37 @@ async def logout():
     return response
 
 
+@app.on_event('startup')
+async def on_startup():
+    if not telegram.START_BOT:
+        return
+    webhook_info = await telegram.bot.get_webhook_info()
+    print(webhook_info)
+    if webhook_info.url != telegram.WEBHOOK_URL:
+        await telegram.bot.set_webhook(
+            url=telegram.WEBHOOK_URL
+        )
+
+
+@app.post(telegram.WEBHOOK_PATH)
+async def bot_webhook(update: dict):
+    telegram_update = types.Update(**update)
+    Dispatcher.set_current(telegram.dp)
+    telegram.Bot.set_current(telegram.bot)
+    await telegram.dp.process_update(telegram_update)
+
+
+@app.on_event('shutdown')
+async def on_shutdown():
+    if not telegram.START_BOT:
+        return
+    await telegram.bot.session.close()
+
+
 if __name__ == "__main__":
     # первый запуск следует осуществлять в IDE, чтобы создать базу данных,
     # в дальнейшем можно запускать через терминал: uvicorn main:app --reload
 
     models.Base.metadata.create_all(models.engine)  # создание базы данных
     uvicorn.run(app)  # запуск сервера uvicorn
+    # uvicorn.run(app, host='0.0.0.0', port=8000)  # для доступа по локальной сети

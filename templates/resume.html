@@ -36,8 +36,44 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col">
+                    <div class="col-lg">
                         <form method="POST" action="{{ url_for('resume_appform') }}">
+                        <div class="row p-2">
+                            <div class="col gx-3">
+                                <div class="form-control">
+                                    <div class="row p-2">
+                                        <div class="col gx-3">
+                                            <label for="name" class="form-label">ФИО</label>
+                                            <input class="form-control form-control-sm" type="text" id="name" name="name" value="{% if data.name %}{{ data.name }}{% endif %}">
+                                        </div>
+                                    </div>
+                                    <div class="row p-2">
+                                        <div class="col-md gx-3">
+                                            <label for="city" class="form-label">Город</label>
+                                            <input class="form-control form-control-sm" type="text" id="city" name="city" value="{% if data.city %}{{ data.city }}{% endif %}">
+                                        </div>
+                                        <div class="col-md gx-3">
+                                            <label for="birthdate" class="form-label">Дата рождения</label>
+                                            <input class="form-control form-control-sm" type="text" id="birthdate" name="birthdate" value="{% if data.birthdate %}{{ data.birthdate }}{% endif %}">
+                                        </div>
+                                        <div class="col-md gx-3">
+                                            <label for="phone" class="form-label">Телефон</label>
+                                            <input class="form-control form-control-sm" type="text" id="phone" name="phone" value="{% if data.phone %}{{ data.phone }}{% endif %}">
+                                        </div>
+                                    </div>
+                                    <div class="row p-2">
+                                        <div class="col-md gx-3">
+                                            <label for="email" class="form-label">email</label>
+                                                <input class="form-control form-control-sm" type="text" id="email" name="email" value="{% if data.email %}{{ data.email }}{% endif %}">
+                                        </div>
+                                        <div class="col-md gx-3">
+                                            <label for="telegram" class="form-label">Telegram</label>
+                                            <input class="form-control form-control-sm" type="text" id="telegram" name="telegram" value="{% if data.telegram %}{{ data.telegram }}{% endif %}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row p-2">
                             <div class="col gx-3">
                                 <div class="form-control">
@@ -134,7 +170,7 @@
                         </div>
                         </form>
                     </div>
-                    <div class="col p-2">
+                    <div class="col-lg p-2">
                         <div class="form-control">
                             {% if resume %}
                             {{ resume }}
