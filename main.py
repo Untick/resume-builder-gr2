@@ -11,7 +11,11 @@ import crud
 import pdf
 import utils
 import chatgpt
-import telegram
+
+# для подключения telegram-бота к приложению раскомментировать строку ниже,
+# так же раскомментировать код в конце main.py
+# import telegram
+
 
 # создаём приложение fastapi
 app = FastAPI(title='Resume builder')
@@ -122,10 +126,10 @@ async def logout():
     return response
 
 
+# для подключения telegram-бота к приложению раскомментировать код ниже
+"""
 @app.on_event('startup')
 async def on_startup():
-    if not telegram.START_BOT:
-        return
     webhook_info = await telegram.bot.get_webhook_info()
     print(webhook_info)
     if webhook_info.url != telegram.WEBHOOK_URL:
@@ -144,9 +148,8 @@ async def bot_webhook(update: dict):
 
 @app.on_event('shutdown')
 async def on_shutdown():
-    if not telegram.START_BOT:
-        return
     await telegram.bot.session.close()
+"""
 
 
 if __name__ == "__main__":

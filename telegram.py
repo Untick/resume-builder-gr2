@@ -1,3 +1,4 @@
+import os
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
@@ -5,20 +6,21 @@ import chatgpt
 import crud
 
 # Для запуска сервиса fastapi одновременно с telegram-ботом, необходимо:
-# 1. установить в коде флаг START_BOT = True
-# 2. ввести TG_BOT_TOKEN (токен вашего телеграм-бота)
+# 1. раскомментировать код в main.py (см. подсказку в коде)
+# 2. ввести TOKEN (токен вашего телеграм-бота)
 # 3. запустить ngrok (команда ngrok http <port>, где <port> совпадает с портом fastapi, обычно 8000)
 # 4. ввести NGROK_URL (ссылку на временный url выдаёт ngrok при запуске)
-#
+
 # Если telegram bot после запуска веб-сервиса не реагирует, следует немного подождать.
 # Для запуска ngrok следует зарегистрироваться на ngrok.com, получить token, скачать приложение ngrok.
 
-START_BOT = False  # True для запуска fastapi вместе с тг-ботом
-TG_BOT_TOKEN = 'YOUR TOKEN'  # токен тг-бота
-NGROK_URL = 'https://fbf0-94-19-240-38.ngrok-free.app'  # url ngrok
+TOKEN = 'YOUR TOKEN'  # токен тг-бота
+TG_BOT_TOKEN = os.environ.get('TG_BOT_TOKEN', TOKEN)
+NGROK_URL = 'https://ngrok-free.app'  # url ngrok, подставить свой
 
 WEBHOOK_PATH = f'/bot/{TG_BOT_TOKEN}'
 WEBHOOK_URL = NGROK_URL + WEBHOOK_PATH
+
 bot = Bot(token=TG_BOT_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot)
