@@ -14,9 +14,9 @@ import crud
 # Если telegram bot после запуска веб-сервиса не реагирует, следует немного подождать.
 # Для запуска ngrok следует зарегистрироваться на ngrok.com, получить token, скачать приложение ngrok.
 
-TOKEN = 'YOUR TOKEN'  # токен тг-бота
+TOKEN = '5533462711:AAG85pG39jwCqUvjWTO5S3-FN1YT21blmSc'  # токен тг-бота
 TG_BOT_TOKEN = os.environ.get('TG_BOT_TOKEN', TOKEN)
-NGROK_URL = 'https://ngrok-free.app'  # url ngrok, подставить свой
+NGROK_URL = 'https://b8ae-94-19-240-38.ngrok-free.app'  # url ngrok, подставить свой
 
 WEBHOOK_PATH = f'/bot/{TG_BOT_TOKEN}'
 WEBHOOK_URL = NGROK_URL + WEBHOOK_PATH
