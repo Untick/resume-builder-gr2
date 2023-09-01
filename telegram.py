@@ -4,6 +4,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 import chatgpt
 import crud
+import utils
 
 # Для запуска сервиса fastapi одновременно с telegram-ботом, необходимо:
 # 1. раскомментировать код в main.py (см. подсказку в коде)
@@ -56,10 +57,17 @@ async def help_command(message: types.Message):
 async def form_command(message: types.Message):
     data = crud.get_user_by_tg_id(message.from_user.username)
     if data:
-        msg = 'Функция в разработке'
+        user_id = data[0]
+        form_data = crud.get_appform(user_id)
+        if form_data:
+            msg = utils.format_appform_tg(form_data)
+            if not msg:
+                msg = 'Пустая анкета'
+        else:
+            msg = 'Ошибка анкеты пользователя'
     else:
         msg = 'Пользователь не обнаружен'
-    await message.answer(msg)
+    await message.answer(msg, parse_mode='HTML')
 
 
 # обработчик команды /resume
