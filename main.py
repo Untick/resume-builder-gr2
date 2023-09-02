@@ -1,6 +1,7 @@
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 from starlette.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from aiogram import types, Dispatcher
@@ -115,6 +116,35 @@ async def resume_appform(request: Request):
 
     context = {'request': request, 'success': success, 'error': error, 'data': user_appform, 'resume': user_resume}
     return templates.TemplateResponse('resume.html', context=context)
+
+
+class TgApi(BaseModel):
+    username: str | None = None
+    token: str | None = None
+
+
+# API для обработчика команды /form во внешнем тг-боте
+@app.post('/tgbot/form')
+async def tgbot_form(data: TgApi):
+    if not utils.check_tg_api_data(data):
+        return
+    return {'message', await utils.form_command(data.username)}
+
+
+# API для обработчика команды /resume во внешнем тг-боте
+@app.post('/tgbot/resume')
+async def tgbot_resume(data: TgApi):
+    if not utils.check_tg_api_data(data):
+        return
+    return {'message', await utils.resume_command(data.username)}
+
+
+# API для обработчика команды /generate во внешнем тг-боте
+@app.post('/tgbot/generate')
+async def tgbot_resume(data: TgApi):
+    if not utils.check_tg_api_data(data):
+        return
+    return {'message', await utils.generate_command(data.username)}
 
 
 # Выход из учётной записи

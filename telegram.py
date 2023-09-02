@@ -2,7 +2,7 @@ import os
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-import chatgpt
+import config
 import crud
 import utils
 
@@ -15,14 +15,10 @@ import utils
 # Если telegram bot после запуска веб-сервиса не реагирует, следует немного подождать.
 # Для запуска ngrok следует зарегистрироваться на ngrok.com, получить token, скачать приложение ngrok.
 
-TOKEN = 'YOUR TOKEN'  # токен тг-бота
-TG_BOT_TOKEN = os.environ.get('TG_BOT_TOKEN', TOKEN)
-NGROK_URL = 'https://ngrok-free.app'  # url ngrok, подставить свой
+WEBHOOK_PATH = f'/bot/{config.TG_BOT_TOKEN}'
+WEBHOOK_URL = config.NGROK_URL + WEBHOOK_PATH
 
-WEBHOOK_PATH = f'/bot/{TG_BOT_TOKEN}'
-WEBHOOK_URL = NGROK_URL + WEBHOOK_PATH
-
-bot = Bot(token=TG_BOT_TOKEN)
+bot = Bot(token=config.TG_BOT_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot)
 
@@ -54,54 +50,22 @@ async def help_command(message: types.Message):
 
 # обработчик команды /form
 @dp.message_handler(commands=['form'])
-async def form_command(message: types.Message):
-    data = crud.get_user_by_tg_id(message.from_user.username)
-    if data:
-        user_id = data[0]
-        form_data = crud.get_appform(user_id)
-        if form_data:
-            msg = utils.format_appform_tg(form_data)
-            if not msg:
-                msg = 'Пустая анкета'
-        else:
-            msg = 'Ошибка анкеты пользователя'
-    else:
-        msg = 'Пользователь не обнаружен'
+async def form_command_tg(message: types.Message):
+    msg = await utils.form_command(message.from_user.username)
     await message.answer(msg, parse_mode='HTML')
 
 
-# обработчик команды /resume
+# обработчик команды /resume (вывод сформированного резюме)
 @dp.message_handler(commands=['resume'])
-async def resume_command(message: types.Message):
-    data = crud.get_user_by_tg_id(message.from_user.username)
-    user_id = data[0]
-
-    if data:
-        msg = crud.get_resume(user_id)
-        if not msg:
-            msg = 'Резюме ещё не сформировано'
-    else:
-        msg = 'Пользователь не обнаружен'
+async def resume_command_tg(message: types.Message):
+    msg = await utils.resume_command(message.from_user.username)
     await message.answer(msg)
 
 
 # обработчик команды /generate
 @dp.message_handler(commands=['generate'])
-async def generate_command(message: types.Message):
-    data = crud.get_user_by_tg_id(message.from_user.username)
-    user_id = data[0]
-
-    if data:
-        result = chatgpt.gpt_resume_builder(user_id)
-        if result:
-            if not crud.save_resume(user_id, ', '.join(result)):
-                msg = 'Ошибка сохранения резюме'
-            else:
-                msg = 'Резюме успешно сгенерировано'
-        else:
-            msg = 'Ошибка генерации резюме'
-    else:
-        msg = 'Пользователь не обнаружен'
+async def generate_command_tg(message: types.Message):
+    msg = await utils.generate_command(message.from_user.username)
     await message.answer(msg)
 
 

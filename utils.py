@@ -1,6 +1,9 @@
+from fastapi import HTTPException
 from starlette.responses import RedirectResponse
 
 import auth
+import chatgpt
+import config
 import crud
 
 
@@ -59,11 +62,10 @@ def get_appform_info_str(data, fields: dict, caption: str) -> str:
     return ret
 
 
-def get_appform_info_skills(data, fields: dict, addition: str, caption: str) -> str:
+def get_appform_info_bool(data, fields: dict, addition: str, caption: str) -> str:
     if not any(key in data for key in fields):
         return ''
-    ret = f"""<b>{caption}</b>
-    """
+    ret = ''
     lst = []
     for key, value in fields.items():
         print(key, value, data[key])
@@ -74,7 +76,7 @@ def get_appform_info_skills(data, fields: dict, addition: str, caption: str) -> 
 
     lst = ', '.join(lst) + (f", {data[addition]}" if addition in data else '')
     if lst:
-        ret = f"""<b>Навыки</b>
+        ret = f"""<b>{caption}</b>
 {lst}
 
 """
@@ -97,7 +99,7 @@ def format_appform_tg(data):
     dc = {'skillPython': 'Python', 'skillNumPy': 'NumPy', 'skillPandas': 'Pandas', 'skillMatplotlib': 'Matplotlib',
           'skillSeaborn': 'Seaborn', 'skillKeras': 'Keras', 'skillPytorch': 'Pytorch', 'skillTensorflow': 'Tensorflow',
           'skillNLP': 'NLP', 'skillGPT': 'GPT', 'skillObjectDetection': 'Object Detection'}
-    ret += get_appform_info_skills(data, dc, 'customSkills', 'Навыки')
+    ret += get_appform_info_bool(data, dc, 'customSkills', 'Навыки')
 
     # образование
     dc = {'education': ''}
@@ -109,6 +111,74 @@ def format_appform_tg(data):
 
     # пройденные в УИИ курсы
     dc = {'courseDataScience': 'Data Science', 'coursePython': 'Python разработчик'}
-    ret += get_appform_info_str(data, dc, 'Курсы УИИ')
+    ret += get_appform_info_bool(data, dc, '', 'Курсы УИИ')
 
     return ret
+
+
+# проверка входящих данных в post-запросе
+def check_tg_api_data(data):
+    # проверка токена
+    if data.token != config.TG_API_TOKEN:
+        raise HTTPException(status_code=400, detail='Token required')
+
+    # проверка имени пользователя
+    if not data.username:
+        raise HTTPException(status_code=400, detail='Required field is missing')
+
+    return True
+
+
+# обработка команды /form в тг-боте
+async def form_command(username: str):
+    data = crud.get_user_by_tg_id(username)
+
+    if data:
+        user_id = data[0]
+        form_data = crud.get_appform(user_id)
+
+        if form_data:
+            msg = format_appform_tg(form_data)
+            if not msg:
+                msg = 'Пустая анкета'
+        else:
+            msg = 'Ошибка анкеты пользователя'
+    else:
+        msg = 'Пользователь не обнаружен'
+
+    return msg
+
+
+# обработка команды /resume в тг-боте
+async def resume_command(username: str):
+    data = crud.get_user_by_tg_id(username)
+    user_id = data[0]
+
+    if data:
+        msg = crud.get_resume(user_id)
+        if not msg:
+            msg = 'Резюме ещё не сформировано'
+    else:
+        msg = 'Пользователь не обнаружен'
+
+    return msg
+
+
+# обработка команды /generate в тг-боте
+async def generate_command(username: str):
+    data = crud.get_user_by_tg_id(username)
+    user_id = data[0]
+
+    if data:
+        result = chatgpt.gpt_resume_builder(user_id)
+        if result:
+            if not crud.save_resume(user_id, ', '.join(result)):
+                msg = 'Ошибка сохранения резюме'
+            else:
+                msg = 'Резюме успешно сгенерировано'
+        else:
+            msg = 'Ошибка генерации резюме'
+    else:
+        msg = 'Пользователь не обнаружен'
+
+    return msg
