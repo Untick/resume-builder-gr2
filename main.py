@@ -1,10 +1,12 @@
+import threading
+
 import uvicorn
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from starlette.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-from aiogram import types, Dispatcher
+
 
 import auth
 import models
@@ -13,10 +15,7 @@ import pdf
 import utils
 import chatgpt
 
-# для подключения telegram-бота к приложению раскомментировать строку ниже,
-# так же раскомментировать код в конце main.py
-# import telegram
-
+import telegram
 
 # создаём приложение fastapi
 app = FastAPI(title='Resume builder')
@@ -157,29 +156,18 @@ async def logout():
 
 
 # для подключения telegram-бота к приложению раскомментировать код ниже
-"""
+
 @app.on_event('startup')
 async def on_startup():
-    webhook_info = await telegram.bot.get_webhook_info()
-    print(webhook_info)
-    if webhook_info.url != telegram.WEBHOOK_URL:
-        await telegram.bot.set_webhook(
-            url=telegram.WEBHOOK_URL
-        )
-
-
-@app.post(telegram.WEBHOOK_PATH)
-async def bot_webhook(update: dict):
-    telegram_update = types.Update(**update)
-    Dispatcher.set_current(telegram.dp)
-    telegram.Bot.set_current(telegram.bot)
-    await telegram.dp.process_update(telegram_update)
+    # запускаем пулинг в отдельном потоке, чтобы не блокировать работу FastAPI
+    my_thread = threading.Thread(target=telegram.bot.infinity_polling)
+    my_thread.start()
 
 
 @app.on_event('shutdown')
 async def on_shutdown():
-    await telegram.bot.session.close()
-"""
+    await telegram.bot.stop_bot()
+
 
 if __name__ == "__main__":
     # первый запуск следует осуществлять в IDE, чтобы создать базу данных,

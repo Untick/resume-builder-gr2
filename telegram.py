@@ -1,42 +1,31 @@
 import os
-from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+
+from pyrogram.storage import MemoryStorage
+from telebot import TeleBot, types
+
 
 import config
 import crud
 import utils
 
-# Для запуска сервиса fastapi одновременно с telegram-ботом, необходимо:
-# 1. раскомментировать код в main.py (см. подсказку в коде)
-# 2. ввести TOKEN (токен вашего телеграм-бота)
-# 3. запустить ngrok (команда ngrok http <port>, где <port> совпадает с портом fastapi, обычно 8000)
-# 4. ввести NGROK_URL (ссылку на временный url выдаёт ngrok при запуске)
 
-# Если telegram bot после запуска веб-сервиса не реагирует, следует немного подождать.
-# Для запуска ngrok следует зарегистрироваться на ngrok.com, получить token, скачать приложение ngrok.
-
-WEBHOOK_PATH = f'/bot/{config.TG_BOT_TOKEN}'
-WEBHOOK_URL = config.NGROK_URL + WEBHOOK_PATH
-
-bot = Bot(token=config.TG_BOT_TOKEN)
-storage = MemoryStorage()
-dp = Dispatcher(bot)
-
+bot = TeleBot(token=config.TG_BOT_TOKEN)
+#storage = MemoryStorage()
 
 # обработчик команды /start
-@dp.message_handler(commands=['start'])
-async def start_command(message: types.Message):
+@bot.message_handler(commands=['start'])
+def start_command(message: types.Message):
     data = crud.get_user_by_tg_id(message.from_user.username)
     if data:
         msg = 'Добро пожаловать, ' + data[1]
     else:
         msg = 'Пользователь не обнаружен'
-    await message.answer(msg)
+    bot.reply_to(message, msg)
 
 
 # обработчик команды /help
-@dp.message_handler(commands=['help'])
-async def help_command(message: types.Message):
+@bot.message_handler(commands=['help'])
+def help_command(message: types.Message):
     data = crud.get_user_by_tg_id(message.from_user.username)
     if data:
         msg = '''Команды бота:
@@ -45,37 +34,37 @@ async def help_command(message: types.Message):
 /generate - сгенерировать новое резюме'''
     else:
         msg = 'Пользователь не обнаружен'
-    await message.answer(msg)
+    bot.reply_to(message, msg)
 
 
 # обработчик команды /form
-@dp.message_handler(commands=['form'])
-async def form_command_tg(message: types.Message):
-    msg = await utils.form_command(message.from_user.username)
-    await message.answer(msg, parse_mode='HTML')
+@bot.message_handler(commands=['form'])
+def form_command_tg(message: types.Message):
+    msg = utils.form_command(message.from_user.username)
+    bot.reply_to(message, msg, parse_mode='HTML')
 
 
 # обработчик команды /resume (вывод сформированного резюме)
-@dp.message_handler(commands=['resume'])
-async def resume_command_tg(message: types.Message):
-    msg = await utils.resume_command(message.from_user.username)
-    await message.answer(msg)
+@bot.message_handler(commands=['resume'])
+def resume_command_tg(message: types.Message):
+    msg = utils.resume_command(message.from_user.username)
+    bot.reply_to(message, msg)
 
 
 # обработчик команды /generate
-@dp.message_handler(commands=['generate'])
+@bot.message_handler(commands=['generate'])
 async def generate_command_tg(message: types.Message):
-    msg = await utils.generate_command(message.from_user.username)
-    await message.answer(msg)
+    msg = utils.generate_command(message.from_user.username)
+    bot.reply_to(message, msg)
 
 
 # общий обработчик команд
-@dp.message_handler()
+@bot.message_handler()
 async def echo_message(message: types.Message):
     data = crud.get_user_by_tg_id(message.from_user.username)
     if not data:
-        await message.answer('Пользователь не обнаружен')
+        bot.reply_to(message, 'Пользователь не обнаружен')
         return
 
     msg = 'Команда не найдена, /help для помощи'
-    await bot.send_message(message.from_user.id, msg)
+    bot.send_message(message.from_user.id, msg)
