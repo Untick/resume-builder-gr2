@@ -12,3 +12,6 @@ python-multipart==0.0.6
 SQLAlchemy==1.4.49
 uvicorn==0.23.2
 starlette==0.27.0
+bcrypt==4.0.1
+pypandoc==1.11
+pypandoc-binary==1.11
