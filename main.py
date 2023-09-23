@@ -107,7 +107,9 @@ async def resume_appform(request: Request):
     user_appform = crud.get_appform(user_id)
     user_resume = crud.get_resume(user_id)
 
-    context = {'request': request, 'success': success, 'error': error, 'data': user_appform, 'resume': user_resume}
+    context = {'request': request, 'success': success, 'error': error, 
+               'data': user_appform, 'resume': user_resume
+               }
     return templates.TemplateResponse('resume.html', context=context)
 
 
