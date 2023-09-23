@@ -35,6 +35,39 @@ class User(Base):
     contacts = relationship(
         "Contact", back_populates="user", cascade="all, delete-orphan"
     )
+    languages = relationship(
+        "UserLanguage", back_populates="user", cascade="all, delete-orphan"
+    )
+
+
+
+class Language(Base):
+    """Иностранные языки."""
+
+    __tablename__ = "languages"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(20), unique=True, nullable=False)
+
+    # связи:
+    user_languages = relationship(
+        "UserLanguage", back_populates="language", cascade="all, delete-orphan"
+    )
+
+
+class UserLanguage(Base):
+    """Иностранный язык пользователя."""
+
+    __tablename__ = "user_languages"
+    id = Column(Integer, primary_key=True)
+    level = Column(String(50))
+    is_show = Column(Boolean, default=True, nullable=False)
+
+    language_id = Column(Integer, ForeignKey("languages.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    # связи:
+    language = relationship("Language", back_populates="user_languages")
+    user = relationship("User", back_populates="languages")
 
 
 class ContactType(Base):
@@ -64,30 +97,30 @@ class Contact(Base):
     user = relationship("User", back_populates="contacts")
 
 
-# Анкета пользователя
-class AppForm(Base):
-    __tablename__ = "appform"
-    id = Column(Integer, ForeignKey(User.id), primary_key=True)
-    skillPython = Column(Boolean)
-    skillNumPy = Column(Boolean)
-    skillPandas = Column(Boolean)
-    skillMatplotlib = Column(Boolean)
-    skillSeaborn = Column(Boolean)
-    skillKeras = Column(Boolean)
-    skillPytorch = Column(Boolean)
-    skillTensorflow = Column(Boolean)
-    skillNLP = Column(Boolean)
-    skillGPT = Column(Boolean)
-    skillObjectDetection = Column(Boolean)
-    customSkills = Column(String)
-    education = Column(String)
-    experience = Column(String)
-    courseDataScience = Column(Boolean)
-    coursePython = Column(Boolean)
+# # Анкета пользователя
+# class AppForm(Base):
+#     __tablename__ = "appform"
+#     id = Column(Integer, ForeignKey(User.id), primary_key=True)
+#     skillPython = Column(Boolean)
+#     skillNumPy = Column(Boolean)
+#     skillPandas = Column(Boolean)
+#     skillMatplotlib = Column(Boolean)
+#     skillSeaborn = Column(Boolean)
+#     skillKeras = Column(Boolean)
+#     skillPytorch = Column(Boolean)
+#     skillTensorflow = Column(Boolean)
+#     skillNLP = Column(Boolean)
+#     skillGPT = Column(Boolean)
+#     skillObjectDetection = Column(Boolean)
+#     customSkills = Column(String)
+#     education = Column(String)
+#     experience = Column(String)
+#     courseDataScience = Column(Boolean)
+#     coursePython = Column(Boolean)
 
 
-# Сгенерированное резюме
-class Resume(Base):
-    __tablename__ = "resume"
-    id = Column(Integer, ForeignKey(User.id), primary_key=True)
-    resume = Column(Text)
+# # Сгенерированное резюме
+# class Resume(Base):
+#     __tablename__ = "resume"
+#     id = Column(Integer, ForeignKey(User.id), primary_key=True)
+#     resume = Column(Text)
