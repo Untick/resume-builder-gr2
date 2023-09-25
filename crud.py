@@ -1,4 +1,4 @@
-from models import SessionLocal, User, AppForm, Resume
+from models import SessionLocal, User # AppForm, Resume
 
 
 # Получение данных пользователя по имени
@@ -39,14 +39,26 @@ def save_appform(user_id: int, data: dict):
     # фильтруем словарь data с помощью списка из допустимых ключей
 
     # для данных типа bool
-    keys_bool = ['skillPython', 'skillNumPy', 'skillPandas', 'skillMatplotlib', 'skillSeaborn',
-                 'skillKeras', 'skillPytorch', 'skillTensorflow', 'skillNLP', 'skillGPT',
-                 'skillObjectDetection', 'courseDataScience', 'coursePython']
+    keys_bool = [
+        "skillPython",
+        "skillNumPy",
+        "skillPandas",
+        "skillMatplotlib",
+        "skillSeaborn",
+        "skillKeras",
+        "skillPytorch",
+        "skillTensorflow",
+        "skillNLP",
+        "skillGPT",
+        "skillObjectDetection",
+        "courseDataScience",
+        "coursePython",
+    ]
     data_bool = {key: bool(value) for key, value in data.items() if key in keys_bool}
     data_bool.update({key: False for key in keys_bool if key not in data})
 
     # для данных типа str
-    keys_str = ['customSkills', 'education', 'experience']
+    keys_str = ["customSkills", "education", "experience"]
     data_str = {key: str(value) for key, value in data.items() if key in keys_str}
     data_str.update({key: 0 for key in keys_str if key not in data})
 
@@ -64,7 +76,7 @@ def save_appform(user_id: int, data: dict):
                 session.commit()
             else:
                 # создаем новую анкету пользователя
-                merged_dict = {'id': user_id, **data_bool, **data_str}
+                merged_dict = {"id": user_id, **data_bool, **data_str}
                 appform = AppForm(**merged_dict)
                 session.add(appform)
                 session.commit()
@@ -80,7 +92,7 @@ def save_resume(user_id: int, resume: str):
         with SessionLocal() as session:
             user_resume = session.query(Resume).filter_by(id=user_id).first()
             if user_resume:
-                setattr(user_resume, 'resume', resume)
+                setattr(user_resume, "resume", resume)
                 session.commit()
             else:
                 user_resume = Resume(id=user_id, resume=resume)
