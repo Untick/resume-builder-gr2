@@ -33,6 +33,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.now)
     is_ready_to_relocate = Column(Boolean)
+    city = Column(String(100))
 
     # связи:
     contacts = relationship(
@@ -44,19 +45,27 @@ class User(Base):
     documents = relationship(
         "Document", back_populates="user", cascade="all, delete-orphan"
     )
+    education = relationship(
+        "Education", back_populates="user", cascade="all, delete-orphan"
+    )
 
 
-# class Language(Base):
-#     """Иностранные языки."""
+class Education(Base):
+    """Образование, курсы."""
 
-#     __tablename__ = "languages"
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String(20), unique=True, nullable=False)
+    __tablename__ = "education"
+    id = Column(Integer, primary_key=True)
+    text = Column(Text)
+    started = Column(DateTime)
+    finished = Column(DateTime)
+    education_type = Column(String(25), nullable=False)  # Высшее, среднее, курсы
+    institution = Column(String(100))  # Институт, организация
+    faculty = Column(String(100))  # факультет, название курса
+    is_show = Column(Boolean, default=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-#     # связи:
-#     user_languages = relationship(
-#         "UserLanguage", back_populates="language", cascade="all, delete-orphan"
-#     )
+    # связь
+    user = relationship("User", back_populates="education")
 
 
 class UserLanguage(Base):
@@ -73,23 +82,12 @@ class UserLanguage(Base):
     user = relationship("User", back_populates="languages")
 
 
-# class ContactType(Base):
-#     """Телефон, Email, github, LinkedIn, VK и прочие."""
-
-#     __tablename__ = "contact_types"
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String(20), unique=True, nullable=False)
-#     contacts = relationship(
-#         "Contact", back_populates="contact_type", cascade="all, delete-orphan"
-#     )
-
-
 class Contact(Base):
     """Контакт пользователя."""
 
     __tablename__ = "contacts"
     id = Column(Integer, primary_key=True)
-    text = Column(String(50), unique=True, nullable=False)
+    contact_text = Column(String(50), unique=True, nullable=False)
     is_show = Column(Boolean, default=True, nullable=False)
     contact_type = Column(String(20), nullable=False)
 
@@ -140,7 +138,6 @@ class Document(Base):
     profession_level = Column(String(30))
     document_type = Column(String(10))
     html_template = Column(String(50))
-    document_skills_id = Column(Integer, ForeignKey("document_skills.id"))
 
     user = relationship(
         "User", back_populates="documents", cascade="all, delete-orphan"
@@ -169,8 +166,12 @@ class Experience(Base):
     id = Column(Integer, primary_key=True)
     text = Column(Text)
     company = Column(String(100))
+    city = Column(String(100))
     project = Column(String(100))
     profession = Column(String(100))
+    experience_type = Column(
+        String(100)
+    )  # основная работа, фриланс, проектная деятельность, личный проект
     duties = Column(String(100))  # обязанности
     аchievements = Column(String(100))  # достижения
     started = Column(DateTime)
@@ -211,19 +212,24 @@ class Skill(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100))
     skill_type = Column(String(100))  # hardskill or softskill or other..
-    document_skills_id = Column(Integer, ForeignKey("document_skills.id"))
 
     # связь
-    document_skills = relationship("DocumentSkill", back_populates="skills")
+    document_skills = relationship(
+        "DocumentSkill", back_populates="skills", cascade="all, delete-orphan"
+    )
 
 
 class DocumentSkill(Base):
     """Навыки в документе."""
 
     __tablename__ = "document_skills"
-    id = Column(Integer, primary_key=True)
-    document_id = Column(Integer, ForeignKey("documents.id"), nullable=False)
-    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=False)
+    # id = Column(Integer, primary_key=True)
+    document_id = Column(
+        Integer, ForeignKey("documents.id"), nullable=False, primary_key=True
+    )
+    skill_id = Column(
+        Integer, ForeignKey("skills.id"), nullable=False, primary_key=True
+    )
     is_show = Column(Boolean, default=True, nullable=False)
     order_skill = Column(Integer, default=5)
 
