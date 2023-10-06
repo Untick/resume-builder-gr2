@@ -3,24 +3,25 @@ import os
 from pyrogram.storage import MemoryStorage
 from telebot import TeleBot, types
 
-
 import config
 import crud
 import utils
 
-
 bot = TeleBot(token=config.TG_BOT_TOKEN)
-#storage = MemoryStorage()
+
+
+# storage = MemoryStorage()
 
 # обработчик команды /start
 @bot.message_handler(commands=['start'])
 def start_command(message: types.Message):
     data = crud.get_user_by_tg_id(message.from_user.username)
     if data:
-        msg = 'Добро пожаловать, ' + data[1]
+        other_message_handler(message)
     else:
         msg = 'Пользователь не обнаружен'
-    bot.reply_to(message, msg)
+        bot.reply_to(message, msg)
+
 
 
 # обработчик команды /help
@@ -59,12 +60,24 @@ async def generate_command_tg(message: types.Message):
 
 
 # общий обработчик команд
-@bot.message_handler()
-async def echo_message(message: types.Message):
-    data = crud.get_user_by_tg_id(message.from_user.username)
-    if not data:
+@bot.message_handler(content_types=['text'])
+def other_message_handler(message: types.Message):
+    user_info_id, user_info_name = crud.get_user_by_tg_id(message.from_user.username)
+    if not user_info_id:
         bot.reply_to(message, 'Пользователь не обнаружен')
         return
+    user_answer = message.text  # еще есть html_text и разные типы сообщения - пока это все не обрабатываем, только простой текст
+    if user_answer.lower().strip() == 'stop':
+        return
 
-    msg = 'Команда не найдена, /help для помощи'
-    bot.send_message(message.from_user.id, msg)
+    if user_answer == "/start":
+        user_answer = "Привет!"
+
+    if user_answer.startswith("/"):
+        msg = 'Команда не найдена, /help для помощи'
+        bot.send_message(message.from_user.id, msg)
+    else:
+        bot.send_chat_action(message.from_user.id, 'typing')
+        next_question = utils.handle_user_reply(message.from_user.username, user_answer)
+        if next_question:
+            bot.send_message(message.from_user.id, next_question)

@@ -14,3 +14,12 @@ uvicorn==0.23.2
 starlette==0.27.0
 aiogram==2.25.1
 pydantic==2.1.1
+auth~=0.5.3
+crud~=0.1
+pdf~=2020.11.12
+utils~=1.0.1
+chatgpt~=2.2212.0
+openai~=0.28.1
+Pyrogram~=2.0.106
+telebot~=0.0.5
+bcrypt

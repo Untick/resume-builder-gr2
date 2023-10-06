@@ -85,7 +85,6 @@ def get_appform_info_bool(data, fields: dict, addition: str, caption: str) -> st
 
 # выдача анкеты пользователя в тг-бот
 def format_appform_tg(data):
-
     # личная информация
     dc = {'name': 'Имя', 'birthdate': 'Дата рождения', 'city': 'Город'}
     ret = get_appform_info_str(data, dc, 'Личные данные')
@@ -96,9 +95,11 @@ def format_appform_tg(data):
 
     # навыки (в будущем надо переделать, пока тестовый вариант)
     # TODO: вынести все навыки с названиями и значениями id для html в отдельную таблицу и получать данные оттуда
-    dc = {'skillPython': 'Python', 'skillNumPy': 'NumPy', 'skillPandas': 'Pandas', 'skillMatplotlib': 'Matplotlib',
-          'skillSeaborn': 'Seaborn', 'skillKeras': 'Keras', 'skillPytorch': 'Pytorch', 'skillTensorflow': 'Tensorflow',
-          'skillNLP': 'NLP', 'skillGPT': 'GPT', 'skillObjectDetection': 'Object Detection'}
+    dc = {
+        'skillPython': 'Python', 'skillNumPy': 'NumPy', 'skillPandas': 'Pandas', 'skillMatplotlib': 'Matplotlib',
+        'skillSeaborn': 'Seaborn', 'skillKeras': 'Keras', 'skillPytorch': 'Pytorch', 'skillTensorflow': 'Tensorflow',
+        'skillNLP': 'NLP', 'skillGPT': 'GPT', 'skillObjectDetection': 'Object Detection'
+    }
     ret += get_appform_info_bool(data, dc, 'customSkills', 'Навыки')
 
     # образование
@@ -132,7 +133,6 @@ def check_tg_api_data(data):
 # обработка команды /form в тг-боте
 async def form_command(username: str):
     data = crud.get_user_by_tg_id(username)
-
     if data:
         user_id = data[0]
         form_data = crud.get_appform(user_id)
@@ -152,9 +152,8 @@ async def form_command(username: str):
 # обработка команды /resume в тг-боте
 async def resume_command(username: str):
     data = crud.get_user_by_tg_id(username)
-    user_id = data[0]
-
     if data:
+        user_id = data[0]
         msg = crud.get_resume(user_id)
         if not msg:
             msg = 'Резюме ещё не сформировано'
@@ -167,9 +166,8 @@ async def resume_command(username: str):
 # обработка команды /generate в тг-боте
 async def generate_command(username: str):
     data = crud.get_user_by_tg_id(username)
-    user_id = data[0]
-
     if data:
+        user_id = data[0]
         result = chatgpt.gpt_resume_builder(user_id)
         if result:
             if not crud.save_resume(user_id, ', '.join(result)):
@@ -182,3 +180,11 @@ async def generate_command(username: str):
         msg = 'Пользователь не обнаружен'
 
     return msg
+
+
+def handle_user_reply(username, user_answer):
+    data = crud.get_user_by_tg_id(username)
+    if data:
+        user_id = data[0]
+        chatgpt.gpt_set_user_answer(user_id, user_answer)
+        return chatgpt.gpt_get_hr_question(user_id)
