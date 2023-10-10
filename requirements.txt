@@ -23,3 +23,5 @@ openai~=0.28.1
 Pyrogram~=2.0.106
 telebot~=0.0.5
 bcrypt
+requests~=2.31.0
+transformers~=4.31.0

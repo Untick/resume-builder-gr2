@@ -1,18 +1,17 @@
-import os
+import datetime
 
 from pyrogram.storage import MemoryStorage
 from telebot import TeleBot, types
+
 
 import config
 import crud
 import utils
 
 bot = TeleBot(token=config.TG_BOT_TOKEN)
-
-
 # storage = MemoryStorage()
 
-# обработчик команды /start
+
 @bot.message_handler(commands=['start'])
 def start_command(message: types.Message):
     data = crud.get_user_by_tg_id(message.from_user.username)
@@ -23,8 +22,6 @@ def start_command(message: types.Message):
         bot.reply_to(message, msg)
 
 
-
-# обработчик команды /help
 @bot.message_handler(commands=['help'])
 def help_command(message: types.Message):
     data = crud.get_user_by_tg_id(message.from_user.username)
@@ -77,7 +74,22 @@ def other_message_handler(message: types.Message):
         msg = 'Команда не найдена, /help для помощи'
         bot.send_message(message.from_user.id, msg)
     else:
-        bot.send_chat_action(message.from_user.id, 'typing')
-        next_question = utils.handle_user_reply(message.from_user.username, user_answer)
-        if next_question:
-            bot.send_message(message.from_user.id, next_question)
+        reply_to_user_message(message, user_answer)
+
+
+@bot.message_handler(content_types=['voice'])
+def voice_message(message):
+    voice = message.voice
+    file_info = bot.get_file(voice.file_id)
+    file_url = f'https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}'
+    start = datetime.datetime.now().timestamp()
+    transcription = utils.get_text_from_audio(file_url)
+    bot.send_message(message.chat.id, f'Результат распознавания ({datetime.datetime.now().timestamp()-start:.1f}): {transcription}')
+    reply_to_user_message(message, transcription)
+
+
+def reply_to_user_message(message, user_answer):
+    bot.send_chat_action(message.from_user.id, 'typing')
+    next_question = utils.handle_user_reply(message.from_user.username, user_answer)
+    if next_question:
+        bot.send_message(message.from_user.id, next_question)

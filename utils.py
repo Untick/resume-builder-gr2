@@ -1,5 +1,9 @@
+import os
+
+import requests
 from fastapi import HTTPException
 from starlette.responses import RedirectResponse
+import whisper
 
 import auth
 import chatgpt
@@ -188,3 +192,58 @@ def handle_user_reply(username, user_answer):
         user_id = data[0]
         chatgpt.gpt_set_user_answer(user_id, user_answer)
         return chatgpt.gpt_get_hr_question(user_id)
+
+
+def get_text_from_audio(file_url: str):
+    response = requests.get(file_url)
+
+    audio_file_path = file_url.split("/")[-1]  # Выберите подходящее имя и формат файла
+    with open(audio_file_path, 'wb') as file:
+        file.write(response.content)
+
+    transcription = transcribe_wisper(audio_file_path, True)
+    print(transcription)
+
+    os.remove(audio_file_path)
+
+    return transcription
+
+
+# Size	Parameters	English-only model	Multilingual model	Required VRAM	Relative speed
+# tiny      39 M    tiny.en 	tiny	~1 GB	~32x
+# base      74 M	base.en	    base	~1 GB	~16x
+# small     244 M	small.en	small	~2 GB	~6x
+# medium    769 M	medium.en	medium	~5 GB	~2x
+# large     1550 M  N/A	        large	~10 GB	1x
+# на практике качество small - неудовлетворительное - не распознает термины
+# качество medium приемлемое, но время на CPU - нет, в 5 раз медленнее реального времени записи
+# кроме питоновских библиотек в системе должен быть установлен ffmpeg
+transcribe_model = whisper.load_model("medium")
+
+
+def transcribe_wisper(audio_file_path, proceed_local=False):
+    if proceed_local:
+        result = transcribe_model.transcribe(audio_file_path, fp16=False)
+        transcription = result["text"]
+    else:
+        url = 'https://api.openai.com/v1/audio/transcriptions'
+        headers = {
+            'Authorization': f'Bearer {config.OPENAI_API_KEY}',
+        }
+
+        response = requests.post(
+            url,
+            headers=headers,
+            files={'file': ('audio.ogg', open(audio_file_path, 'rb'))},
+            data={'model': 'whisper-1'}  # Указываем модель (в данном случае, whisper-1)
+        )
+
+        if response.status_code == 200:
+            result = response.json()
+            transcription = result['text']
+        else:
+            print(f'Ошибка: {response.status_code}')
+            print(response.text)
+            return None
+
+    return transcription
