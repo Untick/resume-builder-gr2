@@ -166,7 +166,7 @@ async def on_startup():
 
 @app.on_event('shutdown')
 async def on_shutdown():
-    await telegram.bot.stop_bot()
+    telegram.bot.stop_bot()
 
 
 if __name__ == "__main__":
